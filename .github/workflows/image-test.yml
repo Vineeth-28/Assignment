@@ -34,7 +34,6 @@ jobs:
 
     steps:
       - name: Start Application Container
-        # Pulls and runs your exact production image from Docker Hub automatically
         run: |
           docker run -d \
             --name app-under-test \
@@ -63,13 +62,25 @@ jobs:
             exit 1
           fi
 
-      # JOB 2 (Continued): Dynamic Security Scan against the production container image
+      # Dynamic Security Scan against the production container image
       - name: OWASP ZAP DAST Scan
         uses: zaproxy/action-baseline@v0.13.0
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           target: 'http://localhost:3000/'
-          fail_action: false # Keeps the build passing even if non-critical headers are missing
+          fail_action: false
+          artifact_name: zap-baseline-internal   # avoids the invalid default "zap_scan"
+
+      - name: Upload ZAP Reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: zap-scan-report
+          path: |
+            report_html.html
+            report_json.json
+            report_md.md
+          if-no-files-found: warn
 
       - name: Diagnostic Dump on Failure
         if: failure()
