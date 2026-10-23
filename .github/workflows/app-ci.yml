@@ -9,6 +9,8 @@ on:
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
+    env:
+      NODE_OPTIONS: "--no-deprecation" 
 
     steps:
       # Step 1: Check out git repo
