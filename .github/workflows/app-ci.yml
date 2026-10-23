@@ -6,7 +6,7 @@ on:
       - main
     paths:
       - "app/**"
-      - ".github/workflows/app-deploy.yml"
+      - ".github/workflows/app-ci.yml"
   workflow_dispatch:
 
 jobs:
