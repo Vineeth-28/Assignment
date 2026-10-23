@@ -62,14 +62,19 @@ jobs:
             exit 1
           fi
 
-      # Dynamic Security Scan against the production container image
+      # Dynamic Security Scan (run ZAP directly, bypassing the action's broken artifact upload)
       - name: OWASP ZAP DAST Scan
-        uses: zaproxy/action-baseline@v0.13.0
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          target: 'http://localhost:3000/'
-          fail_action: false
-          artifact_name: zap-baseline-internal   # avoids the invalid default "zap_scan"
+        run: |
+          chmod 777 "$(pwd)"
+          docker run --rm --network host \
+            -v "$(pwd)":/zap/wrk/:rw \
+            ghcr.io/zaproxy/zaproxy:stable \
+            zap-baseline.py \
+              -t http://localhost:3000/ \
+              -r report_html.html \
+              -J report_json.json \
+              -w report_md.md \
+              -I
 
       - name: Upload ZAP Reports
         if: always()
